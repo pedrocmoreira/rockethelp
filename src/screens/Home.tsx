@@ -6,6 +6,7 @@ import Logo from '../assets/logo_secondary.svg';
 import { Filter } from "../components/Filter";
 import { Button } from "../components/Button";
 import { Order, OrderProps } from "../components/Order";
+import { useNavigation } from "@react-navigation/native";
 
 
 export function Home() {
@@ -20,36 +21,46 @@ export function Home() {
     {
       id: '124',
       patrimony: '123456',
-      when: '18/07/2022 ás 10:00',
+      when: '18/07/2022 ás 14:00',
       status: 'closed',
     },
     {
       id: '125',
       patrimony: '123456',
-      when: '18/07/2022 ás 10:00',
+      when: '20/07/2022 ás 16:30',
       status: 'open',
     },
     {
       id: '126',
       patrimony: '123456',
-      when: '18/07/2022 ás 10:00',
+      when: '21/07/2022 ás 10:00',
       status: 'closed',
     },
     {
       id: '127',
       patrimony: '123456',
-      when: '18/07/2022 ás 10:00',
+      when: '23/07/2022 ás 11:00',
       status: 'open',
     },
     {
       id: '128',
       patrimony: '123456',
-      when: '18/07/2022 ás 10:00',
+      when: '25/07/2022 ás 12:00',
       status: 'closed',
     },
   ]);
 
   const { colors } = useTheme();
+
+  const navigation = useNavigation()
+
+  function handleNewOrder(){
+    navigation.navigate('new');
+  }
+
+  function handleOpenDetails(orderId: string){
+    navigation.navigate('details', {orderId});
+  }
 
   return (
     <VStack flex={1} pb={6} bg='gray.700'>
@@ -91,7 +102,7 @@ export function Home() {
         <FlatList
           data={orders}
           keyExtractor={item => item.id}
-          renderItem={({item}) => <Order data={item} />}
+          renderItem={({item}) => <Order data={item} onPress={() => handleOpenDetails(item.id)}/>}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 20 }}
           ListEmptyComponent={() => (
@@ -103,7 +114,7 @@ export function Home() {
             </Center>
           )}
         />
-        <Button title="Nova Solicitação"/>
+        <Button title="Nova Solicitação" onPress={handleNewOrder}/>
       </VStack>
     </VStack>
   )
