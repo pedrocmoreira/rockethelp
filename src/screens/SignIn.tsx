@@ -6,6 +6,7 @@ import Logo from '../assets/logo_primary.svg';
 
 import { Input } from '../components/Input';
 import { Button } from '../components/Button';
+import { useNavigation } from '@react-navigation/native';
 
 export function SignIn() {
   const [ name, setName ] = useState('');
@@ -13,8 +14,10 @@ export function SignIn() {
   
   const { colors } = useTheme();
 
+  const navigation = useNavigation(); 
+
   function handleSignIn(){
-    console.log(name, password)
+    navigation.navigate('home');
   }
 
   return (
