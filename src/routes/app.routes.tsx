@@ -11,10 +11,6 @@ export function AppRoutes() {
   return (
     <Navigator screenOptions={{ headerShown: false }}>
       <Screen
-        name='signIn'
-        component={SignIn}
-      />
-      <Screen
         name='home'
         component={Home}
       />

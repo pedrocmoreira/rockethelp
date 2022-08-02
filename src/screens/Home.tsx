@@ -1,4 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { Alert } from "react-native";
+import auth from '@react-native-firebase/auth';
+import firestore from '@react-native-firebase/firestore';
 import { VStack, HStack, useTheme, IconButton, Text, Heading, FlatList, Center } from "native-base";
 import { SignOut, ChatTeardropText } from 'phosphor-react-native';
 
@@ -8,47 +11,14 @@ import { Button } from "../components/Button";
 import { Order, OrderProps } from "../components/Order";
 import { useNavigation } from "@react-navigation/native";
 
+import { dateFormat } from "../utils/firestoreDateFormat";
+import { Loading } from "../components/loading";
+
 
 export function Home() {
+  const [ isLoading, setIsLoading ] = useState(true);
   const [ statusSelected, setStatusSelected ] = useState<'open' | 'closed'>('open');
-  const [ orders, setOrders ] = useState<OrderProps[]>([
-    {
-      id: '123',
-      patrimony: '123456',
-      when: '18/07/2022 ás 10:00',
-      status: 'open',
-    },
-    {
-      id: '124',
-      patrimony: '123456',
-      when: '18/07/2022 ás 14:00',
-      status: 'closed',
-    },
-    {
-      id: '125',
-      patrimony: '123456',
-      when: '20/07/2022 ás 16:30',
-      status: 'open',
-    },
-    {
-      id: '126',
-      patrimony: '123456',
-      when: '21/07/2022 ás 10:00',
-      status: 'closed',
-    },
-    {
-      id: '127',
-      patrimony: '123456',
-      when: '23/07/2022 ás 11:00',
-      status: 'open',
-    },
-    {
-      id: '128',
-      patrimony: '123456',
-      when: '25/07/2022 ás 12:00',
-      status: 'closed',
-    },
-  ]);
+  const [ orders, setOrders ] = useState<OrderProps[]>([]);
 
   const { colors } = useTheme();
 
@@ -61,6 +31,41 @@ export function Home() {
   function handleOpenDetails(orderId: string){
     navigation.navigate('details', {orderId});
   }
+
+  function handleLogout(){
+    auth()
+    .signOut()
+    .catch((error) => {
+      console.log(error);
+      return Alert.alert('Sair', 'Não foi possível sair da aplicação');
+    })
+  }
+
+  useEffect(() => {
+    setIsLoading(true);
+    
+    const subscriber = firestore()
+    .collection('orders')
+    .where('status', '==', statusSelected)
+    .onSnapshot(snapshot => {
+      const data = snapshot.docs.map(doc => {
+        const { patrimony, description, status, created_at } = doc.data();
+
+        return{
+          id: doc.id,
+          patrimony,
+          description,
+          status,
+          when: dateFormat(created_at)
+        }
+      });
+
+      setOrders(data);
+      setIsLoading(false);
+    })  //Atualiza os dados em tempo real na aplicação
+
+    return subscriber;
+  }, [statusSelected]);
 
   return (
     <VStack flex={1} pb={6} bg='gray.700'>
@@ -76,6 +81,7 @@ export function Home() {
         <Logo />
         <IconButton
           icon={<SignOut size={26} color={colors.gray[300]} />}
+          onPress={handleLogout}
         />
       </HStack>
       <VStack flex={1} px={6}>
@@ -99,7 +105,9 @@ export function Home() {
             isActive={statusSelected === 'closed'}
           />
         </HStack>
-        <FlatList
+        {
+          isLoading ? <Loading/> :
+          <FlatList
           data={orders}
           keyExtractor={item => item.id}
           renderItem={({item}) => <Order data={item} onPress={() => handleOpenDetails(item.id)}/>}
@@ -113,7 +121,7 @@ export function Home() {
               </Text>
             </Center>
           )}
-        />
+        />}
         <Button title="Nova Solicitação" onPress={handleNewOrder}/>
       </VStack>
     </VStack>
