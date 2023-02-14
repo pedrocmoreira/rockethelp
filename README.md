@@ -17,7 +17,7 @@ Lembrando que é necessário ter uma conta no [Figma](http://figma.com/) para po
  
  ```bash
   git clone branch_url
-  cd expensesapp
+  cd rockethelp
   npm install
   expo start
 ```
